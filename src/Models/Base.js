@@ -1,4 +1,4 @@
-const adapter = use('App/Elastic/Adapter')
+const adapter = use('ElasticLucid/Adapter')
 const bodybuilder = require('bodybuilder')
 
 class ElasticBaseModel {
