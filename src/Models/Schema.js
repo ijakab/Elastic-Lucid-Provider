@@ -1,4 +1,4 @@
-const ElasticModel = use('App/Elastic/Models/Base')
+const ElasticModel = use('ElasticLucid/Model')
 
 class Step extends ElasticModel{
     static get index() {

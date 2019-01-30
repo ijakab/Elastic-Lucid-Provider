@@ -2,8 +2,8 @@
 const ace = require('@adonisjs/ace')
 const fs = use('fs')
 const Helpers = use('Helpers')
-const ElasticAdapter = use('App/Elastic/Adapter')
-const Schema = use('App/Elastic/Models/Schema')
+const ElasticAdapter = use('ElasticLucid/Adapter')
+const Schema = use('ElasticLucid/Schema')
 
 class RunMigration extends ace.Command {
     static get signature() {

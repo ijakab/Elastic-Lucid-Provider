@@ -6,7 +6,7 @@ class ElasticLucidProvider extends ServiceProvider {
         this.app.bind('ElasticLucid/Model', () => {
             return require('../src/Models/Base')
         })
-        this.app.bind('ElasticLucid/Model', () => {
+        this.app.bind('ElasticLucid/Schema', () => {
             return require('../src/Models/Schema')
         })
         this.app.bind('ElasticLucid/Adapter', () => {
