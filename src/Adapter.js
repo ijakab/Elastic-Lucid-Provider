@@ -1,5 +1,5 @@
 module.exports = {
-    type: 'analytics',
+    type: '_doc',
 
     setClient(client) {
         this.client = client
