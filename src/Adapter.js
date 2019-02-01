@@ -1,3 +1,5 @@
+const {pick} = use('lodash')
+
 module.exports = {
     type: '_doc',
 
@@ -57,5 +59,27 @@ module.exports = {
             body
         })
         return response
+    },
+
+    async bulk(index, body, pluckFields) {
+        let elasticStupidBody = []
+        for(let item of body) {
+            let elasticItem = {
+                _index: index,
+                _type: this.type
+            }
+            if(item.modelInstance.id) elasticItem._id = item.modelInstance.id
+            elasticStupidBody.push({
+                [item.action]: elasticItem
+            })
+            let updateBody = item.modelInstance.body
+            if(pluckFields && pluckFields.length) updateBody = pick(item.modelInstance.body, pluckFields)
+
+            elasticStupidBody.push({doc: updateBody})
+        }
+        return await this.client.bulk({
+            type: this.type,
+            body: elasticStupidBody
+        })
     }
 }

@@ -85,6 +85,10 @@ class ElasticBaseModel {
             rows
         }
     }
+
+    static async bulk(bulkBody, ...pluckFields) {
+        return await adapter.bulk(this.index, bulkBody, pluckFields)
+    }
 }
 
 module.exports = ElasticBaseModel
