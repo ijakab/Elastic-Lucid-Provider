@@ -47,6 +47,11 @@ class ElasticBaseModel {
         return this.responseToObject(response)
     }
 
+    static async rawMany(queries) {
+        let results = await adapter.multiSearch(this.index, queries)
+        return results.map(result => this.responseToObject(result))
+    }
+
     static query() {
         let builder = bodybuilder()
 
@@ -86,8 +91,8 @@ class ElasticBaseModel {
         }
     }
 
-    static async bulk(bulkBody, ...pluckFields) {
-        return await adapter.bulk(this.index, bulkBody, pluckFields)
+    static async bulkAction(bulkBody, ...pluckFields) {
+        return await adapter.bulkAction(this.index, bulkBody, pluckFields)
     }
 }
 

@@ -61,7 +61,7 @@ module.exports = {
         return response
     },
 
-    async bulk(index, body, pluckFields) {
+    async bulkAction(index, body, pluckFields) {
         let elasticStupidBody = []
         for(let item of body) {
             let elasticItem = {
@@ -81,5 +81,18 @@ module.exports = {
             type: this.type,
             body: elasticStupidBody
         })
+    },
+
+    async multiSearch(index, searches) {
+        let elasticStupidBody = []
+        for(let search of searches) {
+            elasticStupidBody.push({
+                index,
+                type: this.type
+            })
+            elasticStupidBody.push(search)
+        }
+        let elasticResponse = await this.client.msearch({body: elasticStupidBody})
+        return elasticResponse.responses
     }
 }
