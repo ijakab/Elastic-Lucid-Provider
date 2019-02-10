@@ -79,6 +79,10 @@ class ElasticBaseModel {
             return adapter.search(this.index, builder.build())
         }
 
+        builder.update = (updateObject) => {
+            return adapter.updateByQuery(this.index, builder.build(), updateObject)
+        }
+
         return builder
     }
 

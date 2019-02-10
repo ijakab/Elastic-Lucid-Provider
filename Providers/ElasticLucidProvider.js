@@ -12,6 +12,9 @@ class ElasticLucidProvider extends ServiceProvider {
         this.app.bind('ElasticLucid/Adapter', () => {
             return require('../src/Adapter')
         })
+        this.app.bind('ElasticLucid/ObjectToScript', () => {
+            return require('../src/ObjectToScript')
+        })
     }
 
     boot () {

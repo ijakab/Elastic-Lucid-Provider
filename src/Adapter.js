@@ -1,4 +1,5 @@
 const {pick} = use('lodash')
+const objectToScript = use('ElasticLucid/ObjectToScript')
 
 module.exports = {
     type: '_doc',
@@ -94,5 +95,20 @@ module.exports = {
         }
         let elasticResponse = await this.client.msearch({body: elasticStupidBody})
         return elasticResponse.responses
+    },
+
+    updateByQuery(index, query, updateObject) {
+        return this.client.updateByQuery({
+            index,
+            type: this.type,
+            conflicts: 'proceed',
+            body: {
+                ...query,
+                script: {
+                    lang: 'painless',
+                    source: objectToScript(updateObject)
+                }
+            }
+        })
     }
 }
