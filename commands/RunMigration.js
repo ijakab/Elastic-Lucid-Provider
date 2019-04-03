@@ -21,7 +21,7 @@ class RunMigration extends ace.Command {
         if(confirm) {
             let runSchemas = []
             if(await ElasticAdapter.indexExists(Schema.index)) {
-                let schemas = await Schema.all()
+                let schemas = await Schema.query().paginate(1, 1000)
                 runSchemas = schemas.rows.map(row => row.body.name)
             }
 
