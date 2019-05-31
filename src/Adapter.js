@@ -2,7 +2,6 @@ const {pick} = use('lodash')
 const objectToScript = use('ElasticLucid/ObjectToScript')
 
 module.exports = {
-    type: '_doc',
 
     setClient(client) {
         this.client = client
@@ -25,7 +24,6 @@ module.exports = {
         }
         return await this.client.indices.putMapping({
             index,
-            type: this.type,
             body: JSON.stringify(body)
         })
     },
@@ -40,7 +38,6 @@ module.exports = {
     async createOrUpdate(index, body, id) {
         return await this.client.index({
             index,
-            type: this.type,
             body,
             id
         })
@@ -49,7 +46,6 @@ module.exports = {
     async getSingle(index, id) {
         return await this.client.get({
             index,
-            type: this.type,
             id
         });
     },
@@ -67,7 +63,6 @@ module.exports = {
         for(let item of body) {
             let elasticItem = {
                 _index: index,
-                _type: this.type
             }
             if(item.modelInstance.id) elasticItem._id = item.modelInstance.id
             elasticStupidBody.push({
@@ -79,7 +74,6 @@ module.exports = {
             elasticStupidBody.push({doc: updateBody})
         }
         return await this.client.bulk({
-            type: this.type,
             body: elasticStupidBody
         })
     },
