@@ -46,14 +46,16 @@ module.exports = {
     async getSingle(index, id) {
         return await this.client.get({
             index,
-            id
+            id,
+            rest_total_hits_as_int: true
         });
     },
 
     async search(index, body) {
         let response = await this.client.search({
             index,
-            body
+            body,
+            rest_total_hits_as_int: true
         })
         return response
     },
@@ -83,7 +85,8 @@ module.exports = {
         for(let search of searches) {
             elasticStupidBody.push({
                 index,
-                type: this.type
+                type: this.type,
+                rest_total_hits_as_int: true
             })
             elasticStupidBody.push(search)
         }
