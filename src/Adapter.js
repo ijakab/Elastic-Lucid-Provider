@@ -46,8 +46,7 @@ module.exports = {
     async getSingle(index, id) {
         return await this.client.get({
             index,
-            id,
-            rest_total_hits_as_int: true
+            id
         });
     },
 
