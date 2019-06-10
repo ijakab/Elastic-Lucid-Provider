@@ -85,7 +85,7 @@ module.exports = {
             elasticStupidBody.push({
                 index,
                 type: this.type,
-                rest_total_hits_as_int: true
+                //rest_total_hits_as_int: true elastic might implement this in multiSearch in the future
             })
             elasticStupidBody.push(search)
         }
