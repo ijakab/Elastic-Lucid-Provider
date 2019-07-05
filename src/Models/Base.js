@@ -82,6 +82,21 @@ class ElasticBaseModel {
         builder.update = (updateObject) => {
             return adapter.updateByQuery(this.index, builder.build(), updateObject)
         }
+        
+        builder.iterate = async (iteratee, timeout='10m') => {
+            let startScrollRes = await adapter.startScroll(this.index, builder.build(), timeout)
+            let scrollId = startScrollRes._scroll_id
+            
+            let hits = startScrollRes.hits.hits
+            while(hits.length) {
+                for(let hit of hits) {
+                    let obj = new this(hit._source, hit._id)
+                    await iteratee(obj)
+                }
+                let scrolledResponse = await adapter.nextScroll(scrollId, timeout)
+                hits = scrolledResponse.hits.hits
+            }
+        }
 
         return builder
     }

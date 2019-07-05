@@ -1,5 +1,5 @@
 'use strict'
-const { ServiceProvider } = require('@adonisjs/fold')
+const { ServiceProvider } = use('@adonisjs/fold')
 
 class ElasticLucidProvider extends ServiceProvider {
     register () {

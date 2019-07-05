@@ -106,5 +106,24 @@ module.exports = {
                 }
             }
         })
+    },
+    
+    async startScroll(index, body, timeout) {
+        let response = await this.client.search({
+            size: 10000,
+            index,
+            body,
+            rest_total_hits_as_int: true,
+            scroll: timeout
+        })
+        return response
+    },
+    
+    async nextScroll(scrollId, timeout) {
+        return await this.client.scroll({
+            scrollId,
+            scroll: timeout,
+            rest_total_hits_as_int: true
+        })
     }
 }
