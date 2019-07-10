@@ -1,5 +1,6 @@
 const adapter = use('ElasticLucid/Adapter')
 const bodybuilder = require('bodybuilder')
+const cloneDeep = require('lodash/cloneDeep')
 
 class ElasticBaseModel {
     constructor(body, id) {
@@ -41,6 +42,12 @@ class ElasticBaseModel {
     async save() {
         return await adapter.createOrUpdate(this.constructor.index, this.body, this.id)
     }
+    
+    toJSON() {
+        let clonedBody = cloneDeep(this.body)
+        clonedBody.id = this.id
+        return clonedBody
+    }
 
     static async raw(query) {
         let response = await adapter.search(this.index, query)
@@ -55,15 +62,19 @@ class ElasticBaseModel {
     static query() {
         let builder = bodybuilder()
 
-        builder.fetch = async () => {
+        builder.fetch = async (pagination) => {
             let response = await adapter.search(this.index, builder.build())
-            return this.responseToObject(response)
+            return this.responseToObject(response, pagination)
         }
 
         builder.paginate = async (page, limit) => {
             builder.size(limit)
             builder.from(limit * (page-1))
-            let data = await builder.fetch()
+            let data = await builder.fetch({
+                page,
+                limit,
+                perPage: limit
+            })
             data.pagination.page = page
             data.pagination.limit = limit
             data.pagination.perPage = limit
@@ -101,12 +112,20 @@ class ElasticBaseModel {
         return builder
     }
 
-    static responseToObject(response) {
+    static responseToObject(response, pagination) {
         let rows = response.hits.hits.map(hit => new this(hit._source, hit._id))
         return {
             pagination: {total: response.hits.total},
             aggregations: response.aggregations,
-            rows
+            rows,
+            toJSON() {
+                let records = rows.map(row => row.toJSON())
+                if(!pagination) return records
+                return {
+                    pagination,
+                    records
+                }
+            }
         }
     }
 
