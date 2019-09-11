@@ -1,4 +1,4 @@
-const ElasticModel = use('ElasticLucid/Model')
+const ElasticModel = require('./Base')
 
 class Step extends ElasticModel{
     static get index() {

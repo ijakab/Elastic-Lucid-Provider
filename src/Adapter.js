@@ -1,5 +1,5 @@
-const {pick} = use('lodash')
-const objectToScript = use('ElasticLucid/ObjectToScript')
+const pick = require('lodash/pick')
+const objectToScript = require('./ObjectToScript')
 
 module.exports = {
 

@@ -32,6 +32,7 @@ const aceProviders = [
 
 ```javascript
 const Env = use('Env')
+const Helpers = use('Helpers')
 
 module.exports = {
     connection: {
@@ -40,7 +41,8 @@ module.exports = {
         vpcActive: Env.get('ELASTIC_VPC_ACTIVE', false),
         username: Env.get('ELASTIC_USER', null),
         password: Env.get('ELASTIC_PASS', null)
-    }
+    },
+    migrationsDirectory: Helpers.appRoot('Elastic/Schema')
 }
 ```
 
@@ -301,6 +303,26 @@ await User.rawMany([
     {action: 'delete', modelInstance: paul},
 ])
 
+```
+
+## USING OUTSIDE OF ADONIS
+
+This provider is not dependent on adonis framework. However, there are couple of things to keep in mind
+
+1. You need to call server init function on server init and pass configuration (configuration is like config file you would make in adonis)
+
+```javascript
+const elasticLucid = require('elastic-lucid-provider')
+elasticLucid({
+    connection: {
+        host,
+        log,
+        vpcActive,
+        username,
+        password
+    },
+    migrationsDirectory: __dirname
+})
 ```
 
 

@@ -1,4 +1,4 @@
-const adapter = use('ElasticLucid/Adapter')
+const adapter = require('../Adapter')
 const bodybuilder = require('bodybuilder')
 const cloneDeep = require('lodash/cloneDeep')
 

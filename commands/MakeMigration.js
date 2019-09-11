@@ -2,7 +2,8 @@
 
 const { Command } = require('@adonisjs/ace')
 const Helpers = use('Helpers')
-const {upperFirst, lowerFirst} = use('lodash')
+const upperFirst = require('lodash/upperFirst')
+const lowerFirst = require('lodash/lowerFirst')
 
 class MakeMigration extends Command {
     static get signature () {
