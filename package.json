@@ -1,14 +1,14 @@
 {
   "name": "elastic-lucid-provider",
   "version": "1.4.0",
-  "description": "Elasticsearch lucide provider for adonis js",
+  "description": "Elasticsearch lucid provider for adonis js",
   "main": "Providers/ElasticLucidProvider.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
-    "type": "",
-    "url": ""
+    "type": "github",
+    "url": "https://github.com/ijakab/Elastic-Lucid-Provider"
   },
   "keywords": [
     "elastic",
