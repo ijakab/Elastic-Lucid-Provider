@@ -16,7 +16,7 @@ class RunMigration extends ace.Command {
             .confirm('Are you sure you want to run mapping? You might loose some data')
 
         if(confirm) {
-            await runMigrations.bind(this)
+            await runMigrations()
 
             this.success('Schemas run')
         }

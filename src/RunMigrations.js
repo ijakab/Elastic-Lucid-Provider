@@ -24,6 +24,5 @@ module.exports = async () => {
         await Schema.create({
             name: schemaFile
         })
-        this.success(`Run schema for ${schemaFile}`)
     }
 }
