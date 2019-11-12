@@ -105,6 +105,12 @@ class ElasticBaseModel {
     
     static boot() {}
     
+    static addTrait(trait, options) {
+        let Trait = typeof trait === 'string' ? use(trait) : trait
+        let traitInstance = new Trait()
+        traitInstance.register(this, options)
+    }
+    
     static get iocHooks () {
         return ['_bootIfNotBooted']
     }
