@@ -1,7 +1,7 @@
 const adapter = require('../Adapter')
 const bodybuilder = require('bodybuilder')
-const cloneDeep = require('lodash/cloneDeep')
 const extendBuilder = require('../ExtendBuilder')
+const BaseSerializer = require('../Serializers/Base')
 
 class ElasticBaseModel {
     constructor(body, id) {
@@ -50,9 +50,9 @@ class ElasticBaseModel {
     }
     
     toJSON() {
-        let clonedBody = cloneDeep(this.body)
-        clonedBody.id = this.id
-        return clonedBody
+        const Serializer = this.constructor.resolveSerializer()
+        const serializer = new Serializer([this], null, {isOne: true})
+        return serializer.toJSON()
     }
 
     static async raw(query) {
@@ -68,22 +68,23 @@ class ElasticBaseModel {
     static query() {
         return extendBuilder(bodybuilder(), this)
     }
+    
+    static get Serializer() {
+        return BaseSerializer
+    }
+    
+    static resolveSerializer() {
+        if(typeof this.Serializer === 'string') {
+            return use(this.Serializer)
+        } else {
+            return this.Serializer
+        }
+    }
 
     static responseToObject(response, pagination) {
-        let rows = response.hits.hits.map(hit => new this(hit._source, hit._id))
-        return {
-            pagination: {total: response.hits.total},
-            aggregations: response.aggregations,
-            rows,
-            toJSON() {
-                let records = rows.map(row => row.toJSON())
-                if(!pagination) return records
-                return {
-                    pagination,
-                    records
-                }
-            }
-        }
+        const rows = response.hits.hits.map(hit => new this(hit._source, hit._id))
+        const Serializer = this.resolveSerializer()
+        return new Serializer(rows, response.aggregations, pagination)
     }
 
     static async bulkAction(bulkBody, ...pluckFields) {

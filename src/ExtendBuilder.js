@@ -7,20 +7,15 @@ module.exports = (builderInstance, Model) => {
     builderInstance.paginate = async (page, limit) => {
         builderInstance.size(limit)
         builderInstance.from(limit * (page-1))
-        let data = await builderInstance.fetch({
+        return await builderInstance.fetch({
             page,
             limit,
             perPage: limit
         })
-        data.pagination.page = page
-        data.pagination.limit = limit
-        data.pagination.perPage = limit
-        return data
     }
     
     builderInstance.first = async () => {
-        let data = await builderInstance.fetch()
-        return data.rows[0]
+        return  await builderInstance.fetch({isOne: true})
     }
     
     builderInstance.nativeResult = () => {
