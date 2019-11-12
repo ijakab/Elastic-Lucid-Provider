@@ -9,7 +9,7 @@ class BaseSerializer {
     
     toJSONSingle(modelInstance) {
         let clonedBody = cloneDeep(modelInstance.body)
-        clonedBody.id = modelInstance.id
+        clonedBody._elasticId = modelInstance.id
         return clonedBody
     }
     
