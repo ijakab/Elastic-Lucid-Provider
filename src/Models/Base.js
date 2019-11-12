@@ -1,11 +1,13 @@
 const adapter = require('../Adapter')
 const bodybuilder = require('bodybuilder')
 const cloneDeep = require('lodash/cloneDeep')
+const extendBuilder = require('../ExtendBuilder')
 
 class ElasticBaseModel {
     constructor(body, id) {
         this.id = id
         this.body = body
+        this.adapter = adapter
     }
 
     static get createdAtField() {
@@ -60,56 +62,7 @@ class ElasticBaseModel {
     }
 
     static query() {
-        let builder = bodybuilder()
-
-        builder.fetch = async (pagination) => {
-            let response = await adapter.search(this.index, builder.build())
-            return this.responseToObject(response, pagination)
-        }
-
-        builder.paginate = async (page, limit) => {
-            builder.size(limit)
-            builder.from(limit * (page-1))
-            let data = await builder.fetch({
-                page,
-                limit,
-                perPage: limit
-            })
-            data.pagination.page = page
-            data.pagination.limit = limit
-            data.pagination.perPage = limit
-            return data
-        }
-
-        builder.first = async () => {
-            let data = await builder.fetch()
-            return data.rows[0]
-        }
-
-        builder.nativeResult = () => {
-            return adapter.search(this.index, builder.build())
-        }
-
-        builder.update = (updateObject) => {
-            return adapter.updateByQuery(this.index, builder.build(), updateObject)
-        }
-        
-        builder.iterate = async (iteratee, timeout='10m') => {
-            let startScrollRes = await adapter.startScroll(this.index, builder.build(), timeout)
-            let scrollId = startScrollRes._scroll_id
-            
-            let hits = startScrollRes.hits.hits
-            while(hits.length) {
-                for(let hit of hits) {
-                    let obj = new this(hit._source, hit._id)
-                    await iteratee(obj)
-                }
-                let scrolledResponse = await adapter.nextScroll(scrollId, timeout)
-                hits = scrolledResponse.hits.hits
-            }
-        }
-
-        return builder
+        return extendBuilder(bodybuilder(), this)
     }
 
     static responseToObject(response, pagination) {

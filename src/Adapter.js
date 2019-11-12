@@ -108,6 +108,16 @@ module.exports = {
         })
     },
     
+    deleteByQuery(index, body) {
+        return this.client.deleteByQuery({
+            index,
+            type: this.type,
+            conflicts: 'proceed',
+            body
+        })
+    },
+    
+    
     async startScroll(index, body, timeout) {
         let response = await this.client.search({
             size: 10000,
