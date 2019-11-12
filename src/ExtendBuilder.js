@@ -44,4 +44,8 @@ module.exports = (builderInstance, Model) => {
             hits = scrolledResponse.hits.hits
         }
     }
+    
+    if(Model._queryMacro) {
+        Object.assign(builderInstance, Model._queryMacro)
+    }
 }

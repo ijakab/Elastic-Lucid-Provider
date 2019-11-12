@@ -64,6 +64,11 @@ class ElasticBaseModel {
         let results = await adapter.multiSearch(this.index, queries)
         return results.map(result => this.responseToObject(result))
     }
+    
+    static queryMacro(name, handler) {
+        if(!this._queryMacro) this._queryMacro = {}
+        this._queryMacro[name] = handler
+    }
 
     static query() {
         return extendBuilder(bodybuilder(), this)
