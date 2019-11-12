@@ -45,6 +45,10 @@ class ElasticBaseModel {
         return await adapter.createOrUpdate(this.constructor.index, this.body, this.id)
     }
     
+    async delete() {
+        return await adapter.deleteSingle(this.constructor.index, this.id)
+    }
+    
     toJSON() {
         let clonedBody = cloneDeep(this.body)
         clonedBody.id = this.id

@@ -49,14 +49,21 @@ module.exports = {
             id
         });
     },
+    
+    async deleteSingle(index, id) {
+        return await this.client.delete({
+            index,
+            type: this.type,
+            id
+        })
+    },
 
     async search(index, body) {
-        let response = await this.client.search({
+        return  await this.client.search({
             index,
             body,
             rest_total_hits_as_int: true
         })
-        return response
     },
 
     async bulkAction(index, body, pluckFields) {
