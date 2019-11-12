@@ -95,6 +95,23 @@ class ElasticBaseModel {
     static async bulkAction(bulkBody, ...pluckFields) {
         return await adapter.bulkAction(this.index, bulkBody, pluckFields)
     }
+    
+    static _bootIfNotBooted () {
+        if (!this.$booted) {
+            this.$booted = true
+            this.boot()
+        }
+    }
+    
+    static boot() {}
+    
+    static get iocHooks () {
+        return ['_bootIfNotBooted']
+    }
+    
+    static get makePlain () {
+        return true
+    }
 }
 
 module.exports = ElasticBaseModel
