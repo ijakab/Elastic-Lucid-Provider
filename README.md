@@ -132,6 +132,8 @@ Much like with lucid, you can `Model.create({...body})`, `Model.find(id)`, `Mode
 
 When you have instance, you can edit its attributes and run `instance.save()`. It will create new record or update existing (depending if it has id or not).
 
+Also, you can run `instance.delete()` to delete instance from elastic
+
 **Main difference between lucid and elastic lucid api comes here**: Attributes are nested inside body object.
 
 So unlike lucid, where you would do something like `user.name = 'joe'`, here you would do it like
@@ -191,9 +193,7 @@ Those are:
 
 `fetch`, `paginate` and `first` work much the same way as they do in lucid - they return model instance or holder with rows property that is array of model instances.
 
-`update` also works much the same way as in lucid.
-
-`delete` is not implemented in this version. we never needed it :( Coming soon
+`update` and `delete also works much the same way as in lucid.
 
 `nativeResult` will return result as returned by npm elastic adapter without any modification.
 
