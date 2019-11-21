@@ -1,9 +1,10 @@
 'use strict'
 
-const { Command } = require('@adonisjs/ace')
+const { Command } = use('@adonisjs/ace')
 const Helpers = use('Helpers')
 const upperFirst = require('lodash/upperFirst')
 const lowerFirst = require('lodash/lowerFirst')
+const config = require('../src/config')
 
 class MakeMigration extends Command {
     static get signature () {
@@ -15,7 +16,7 @@ class MakeMigration extends Command {
     }
 
     async handle (args, options) {
-        await this.ensureFile(Helpers.appRoot(`app/Elastic/Schemas/${Date.now()}_${lowerFirst(args.name)}.js`))
+        await this.ensureFile(`${config.migrationsDirectory}/${Date.now()}_${lowerFirst(args.name)}.js`)
         if(options.model) await this.ensureFile(Helpers.appRoot(`app/Elastic/Models/${upperFirst(args.name)}.js`))
         this.success('Migration created')
         process.exit(0)

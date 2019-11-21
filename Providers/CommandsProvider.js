@@ -1,7 +1,7 @@
 'use strict'
 
-const ace = require('@adonisjs/ace')
-const { ServiceProvider } = require('@adonisjs/fold')
+const ace = use('@adonisjs/ace')
+const { ServiceProvider } = use('@adonisjs/fold')
 
 class CommandsProvider extends ServiceProvider {
     register () {

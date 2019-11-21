@@ -1,5 +1,5 @@
 'use strict'
-const ace = require('@adonisjs/ace')
+const ace = use('@adonisjs/ace')
 const runMigrations = require('../src/RunMigrations')
 
 class RunMigration extends ace.Command {
