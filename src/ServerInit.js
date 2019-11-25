@@ -1,4 +1,6 @@
 const config = require('./config')
+const { Client } = require('@elastic/elasticsearch')
+const ElasticAdapter = require('../src/Adapter')
 
 module.exports = (configSource) => {
     if(!configSource && typeof configSource !== 'object') throw {
@@ -19,24 +21,15 @@ module.exports = (configSource) => {
         throw error
     }
     
-    const elasticSearch = require('elasticsearch')
-    
     let esConfig = {
-        host: connectionConfig.host,
+        node: connectionConfig.host,
         log: connectionConfig.log // trace is useful sometimes
     }
-    
-    if (connectionConfig.vpcActive) {
-        esConfig.connectionClass = require('http-aws-es')
-    } else {
-        const user = connectionConfig.username
-        const pass = connectionConfig.password
-        if (user && pass) {
-            esConfig.httpAuth = `${user}:${pass}`
-        }
+    const user = connectionConfig.username
+    const pass = connectionConfig.password
+    if (user && pass) {
+        esConfig.httpAuth = `${user}:${pass}`
     }
-    const client = new elasticSearch.Client(esConfig)
     
-    const ElasticAdapter = require('../src/Adapter')
-    ElasticAdapter.setClient(client)
+    ElasticAdapter.setClient(new Client(esConfig))
 }

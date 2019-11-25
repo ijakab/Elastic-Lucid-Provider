@@ -61,8 +61,7 @@ module.exports = {
     async search(index, body) {
         return  await this.client.search({
             index,
-            body,
-            rest_total_hits_as_int: true
+            body
         })
     },
 
@@ -91,8 +90,7 @@ module.exports = {
         for(let search of searches) {
             elasticStupidBody.push({
                 index,
-                type: this.type,
-                //rest_total_hits_as_int: true elastic might implement this in multiSearch in the future
+                type: this.type
             })
             elasticStupidBody.push(search)
         }

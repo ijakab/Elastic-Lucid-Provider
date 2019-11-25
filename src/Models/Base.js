@@ -7,7 +7,10 @@ class ElasticBaseModel {
     constructor(body, id) {
         this.id = id
         this.body = body
-        this.adapter = adapter
+    }
+    
+    static get adapter() {
+        return adapter
     }
 
     static get createdAtField() {
@@ -106,7 +109,15 @@ class ElasticBaseModel {
     static boot() {}
     
     static addTrait(trait, options) {
-        let Trait = typeof trait === 'string' ? use(trait) : trait
+        let Trait
+        if(typeof trait !== 'string') Trait = trait
+        else {
+            try {
+                Trait = use('App/Models/Traits/Elastic/' + trait)
+            } catch (e) {
+                Trait = use(trait)
+            }
+        }
         let traitInstance = new Trait()
         traitInstance.register(this, options)
     }

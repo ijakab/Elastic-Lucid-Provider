@@ -48,4 +48,6 @@ module.exports = (builderInstance, Model) => {
     if(Model._queryMacro) {
         Object.assign(builderInstance, Model._queryMacro)
     }
+    
+    return builderInstance
 }

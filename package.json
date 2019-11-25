@@ -24,8 +24,8 @@
   },
   "homepage": "",
   "dependencies": {
+    "@elastic/elasticsearch": "7.4.0",
     "bodybuilder": "2.2.18",
-    "elasticsearch": "16.5.0",
     "fs-extra": "8.1.0",
     "http-aws-es": "6.0.0",
     "lodash": "4.17.13"

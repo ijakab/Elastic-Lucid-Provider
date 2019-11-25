@@ -1,13 +1,17 @@
 const config = require('./config')
 const fs = require('fs-extra')
 const ElasticAdapter = require('./Adapter')
-const Schema = require('./Models/Schema')
+const Schema = require('./Models/Schema') //Schema model
+const SchemaSchema = require('./Migrations/Schema') //Schema migration
 
 module.exports = async () => {
     let runSchemas = []
     if(await ElasticAdapter.indexExists(Schema.index)) {
         let schemas = await Schema.query().paginate(1, 1000)
         runSchemas = schemas.rows.map(row => row.body.name)
+    } else {
+        await ElasticAdapter.createIndex(Schema.index)
+        await ElasticAdapter.runMapping(Schema.index, SchemaSchema.mappings)
     }
     
     let items = await fs.readdir(config.migrationsDirectory)

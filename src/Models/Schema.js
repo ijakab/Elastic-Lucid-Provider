@@ -1,8 +1,9 @@
 const ElasticModel = require('./Base')
+const config = require('../config')
 
-class Step extends ElasticModel{
+class Step extends ElasticModel {
     static get index() {
-        return 'app_schema'
+        return config.schemaIndex || 'app_schema'
     }
 }
 
