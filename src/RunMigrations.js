@@ -22,9 +22,15 @@ module.exports = async () => {
         let schema = require(`${config.migrationsDirectory}/${schemaFile}`)
         if(!schema.index) continue
         if(runSchemas.includes(schemaFile)) continue
-        if(!(await ElasticAdapter.indexExists(schema.index))) await ElasticAdapter.createIndex(schema.index)
-        if(schema.mappings) await ElasticAdapter.runMapping(schema.index, schema.mappings)
-        if(schema.settings) await ElasticAdapter.runSettings(schema.index, schema.settings)
+        try {
+            if(!(await ElasticAdapter.indexExists(schema.index))) await ElasticAdapter.createIndex(schema.index)
+            if(schema.mappings) await ElasticAdapter.runMapping(schema.index, schema.mappings)
+            if(schema.settings) await ElasticAdapter.runSettings(schema.index, schema.settings)
+        } catch (e) {
+            console.log('error during migrations %o', e)
+            throw e
+        }
+        
         await Schema.create({
             name: schemaFile
         })
