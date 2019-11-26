@@ -16,10 +16,21 @@ class ElasticBaseModel {
     static get createdAtField() {
         return 'createdAt'
     }
+    
+    static get resourceType() {
+        return this.name
+    }
+    
+    static get resourceTypeField() {
+        return 'resourceType'
+    }
 
     static async create(body, id) {
         if(this.createdAtField) {
             body[this.createdAtField] = new Date()
+        }
+        if(this.resourceType) {
+            body[this.resourceTypeField] = this.resourceType
         }
         let obj = new this(body, id)
         let response = await obj.save()
