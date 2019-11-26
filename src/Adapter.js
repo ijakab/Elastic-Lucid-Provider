@@ -8,7 +8,8 @@ module.exports = {
     },
 
     async indexExists(index) {
-        return await this.client.indices.exists({index})
+        let response = await this.client.indices.exists({index})
+        return response && response.body
     },
 
     async createIndex(index) {

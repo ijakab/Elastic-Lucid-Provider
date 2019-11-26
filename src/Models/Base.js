@@ -89,10 +89,11 @@ class ElasticBaseModel {
         }
     }
 
-    static responseToObject(response, pagination) {
-        const rows = response.hits.hits.map(hit => new this(hit._source, hit._id))
+    static responseToObject(response, pagination={}) {
+        const rows = response.body.hits.hits.map(hit => new this(hit._source, hit._id))
+        pagination.total = response.body.hits.total.value
         const Serializer = this.resolveSerializer()
-        return new Serializer(rows, response.aggregations, pagination)
+        return new Serializer(rows, response.body.aggregations, pagination)
     }
 
     static async bulkAction(bulkBody, ...pluckFields) {
