@@ -23,11 +23,32 @@ module.exports = async () => {
         if(!schema.index) continue
         if(runSchemas.includes(schemaFile)) continue
         try {
-            if(!(await ElasticAdapter.indexExists(schema.index))) await ElasticAdapter.createIndex(schema.index)
-            if(schema.mappings) await ElasticAdapter.runMapping(schema.index, schema.mappings)
-            if(schema.settings) await ElasticAdapter.runSettings(schema.index, schema.settings)
+            if(!(await ElasticAdapter.indexExists(schema.index))) {
+                await ElasticAdapter.createIndex(schema.index)
+                console.log('Created index ', schema.index)
+            }
+            
+            if(schema.settings) {
+                await ElasticAdapter.closeIndex(schema.index)
+                try {
+                    await ElasticAdapter.runSettings(schema.index, schema.settings)
+                } catch (e) {
+                    await ElasticAdapter.openIndex(schema.index)
+                    throw e
+                }
+                await ElasticAdapter.openIndex(schema.index)
+    
+    
+                console.log('Run settings for ', schemaFile)
+            }
+    
+            if(schema.mappings) {
+                await ElasticAdapter.runMapping(schema.index, schema.mappings)
+                console.log('Run mapping for ', schemaFile)
+            }
         } catch (e) {
-            console.log('error during migrations %o', e)
+            console.error('error during migrations %o', e)
+            console.warn('Be aware that if only part of migration is successful, it will not be reverted, but this migration will run again. If you need to revert anything, you need to do it manually')
             throw e
         }
         

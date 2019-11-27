@@ -15,6 +15,14 @@ module.exports = {
     async createIndex(index) {
         return await this.client.indices.create({index})
     },
+    
+    async openIndex(index) {
+        return await this.client.indices.open({index})
+    },
+    
+    async closeIndex(index) {
+        return await this.client.indices.close({index})
+    },
 
     async runMapping(index, body) {
         let properties = Object.keys(body.properties)
