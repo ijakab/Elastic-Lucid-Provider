@@ -49,12 +49,30 @@ class ElasticBaseModel {
             return undefined
         }
     }
+    
+    static async findBy(field, value) {
+        return await this.query()
+            .query('match', field, value)
+            .first()
+    }
 
     static async findOrFail(id) {
         let response = await adapter.getSingle(this.index, id)
         return new this(response._source, response._id)
     }
+    
+    static async findByOrFail(field, value) {
+        let instance = await this.query()
+            .query('match', field, value)
+            .first()
+        if(!instance) throw {status: 400, message: 'error.notFound'}
+        return instance
+    }
 
+    merge(newBody) {
+        Object.assign(this.body, newBody)
+    }
+    
     async save() {
         return await adapter.createOrUpdate(this.constructor.index, this.body, this.id)
     }

@@ -15,7 +15,8 @@ module.exports = (builderInstance, Model) => {
     }
     
     builderInstance.first = async () => {
-        return  await builderInstance.fetch({isOne: true})
+        let result = await builderInstance.fetch({isOne: true})
+        return result.rows[0]
     }
     
     builderInstance.nativeResult = () => {
