@@ -42,7 +42,8 @@ module.exports = {
         username: Env.get('ELASTIC_USER', null),
         password: Env.get('ELASTIC_PASS', null)
     },
-    migrationsDirectory: Helpers.appRoot('Elastic/Schema')
+    migrationsDirectory: Helpers.appRoot('Elastic/Schema'),
+    schemaIndex: 'gb_schema'
 }
 ```
 
@@ -52,22 +53,7 @@ module.exports = {
 
 The provider stores information about run migrations in separate index called `app_schema`
 
-In order to use migrations, make `app/Elastic/0000_Schema.jsz file with following code:
-
-```javascript
-module.exports = {
-    index: 'app_schema',
-    mappings: {
-        dynamic: false,
-        properties: {
-            name: 'text',
-            createdAt: 'date',
-        }
-    }
-}
-```
-
-Migrations need to be stored in `app/Elastic/Schemas` (will be configurable in the future). If you registered commands provider, make new schema by running command:
+Migrations need to be stored in directory specified in config file. (will be configurable in the future). If you registered commands provider, make new schema by running command:
 
 `adonis make:elastic_migration {name: migration name} { --model: create a model also }`
 
@@ -91,7 +77,21 @@ module.exports = {
 
 Read more about what can be put in settings and mappings on elasticsearch documentation. 
 
-However, notice that provider gives you a little shortcut, you can simply set field type as string. It will be converted to object `{type: 'string'}`. If you need anything custom, you need to pass object as specified by elasticsearch documentation.
+Order of each migration is:
+
+1. create index if it does not exist
+
+2. close index
+
+3. run settings
+
+4. open index
+
+5. run mapping
+
+Notice that provider gives you a little shortcut, you can simply set field type as string. It will be converted to object `{type: 'string'}`. If you need anything custom, you need to pass object as specified by elasticsearch documentation.
+
+**Note** Transactions are not supported, so if you have an error in migrations, part that executed will stay there. You have to revert it manually.
 
 ## MODELS
 
@@ -112,12 +112,20 @@ class User extends ElasticModel{
     }
     
     static get createdAtField() {
-        return 'created_at'
+        return 'created_at' //defaults to createdAt
+    }
+    
+    static get resourceType() {
+        return 'User' //defaults to model name
+    }
+    
+    static get resourceTypeField() {
+        return 'resourceType' //defaults to resourceType
     }
 
 }
 
-module.exports = Step
+module.exports = User
 ```
 
 They need to have index getter on them and extend BaseModel which is bound to `ElasticLucid/Model`
@@ -126,15 +134,19 @@ Use it as any other adonis entity.
 
 ### Model instances
 
-Get new instance simply by `new Model(body, id)`. If id is provided, it is automatically assumed that record with that database exists in elastic.
+Get new instance simply by `new Model(body, id)`. If id is provided, it is automatically assumed that record with that id exists in elastic.
 
-Much like with lucid, you can `Model.create({...body})`, `Model.find(id)`, `Model.findOrFail(id)`
+Much like with lucid, you can `Model.create({...body})`, `Model.find(id)`, `Model.findOrFail(id)`, `Model.findBy(fieldInBody, value)`, `Model.findByOrFail(id)`
 
 When you have instance, you can edit its attributes and run `instance.save()`. It will create new record or update existing (depending if it has id or not).
 
 Also, you can run `instance.delete()` to delete instance from elastic
 
-**Main difference between lucid and elastic lucid api comes here**: Attributes are nested inside body object.
+Also like in lucid, you can run `instance.merge(body)` to merge object into body.
+
+### **Main difference between lucid and elastic lucid api**:
+ 
+Attributes are nested inside body object.
 
 So unlike lucid, where you would do something like `user.name = 'joe'`, here you would do it like
 
@@ -146,21 +158,25 @@ So unlike lucid, where you would do something like `user.name = 'joe'`, here you
 
 This change needed to be made, because unlike most sql databases, elastic does not treat id same as other attributes
 
-### Model instance holders
+### Static getters
+
+You can define static getters for `createdAtField`, `resourceType` and `resourceTypeField`, and those will be implicitly added when creating elastic documents. Set any to null if you don't want to have them. However, resourceType is useful when building global search, and searching over multiple indexes.
+
+### Serializers
 
 Like in lucid, you can use `Model.all()` and various query builder methods to get multiple instances
 
-Those methods will return object like this:
+Those methods will return instance of serializer defined on model. You can defined your own (see below) or use base serializer. It will look like this
 
 ```javascript
 {
-    pages: {total: 40},
+    pages: {total: 20, isOne: false},
     aggregations: {}, //aggregation results, if any
     rows: [] //array of models
 }
 ```
 
-On any model instance or holder you can apply .toJSON method to get serialized data. Unlike lucid, this provider does not yet support custom serializers, hidden fields etc.
+On any model or serializer instance you can apply .toJSON method to get serialized data.
 
 ### Query builder
 
@@ -191,9 +207,7 @@ Those are:
 1. update
 1. iterate
 
-`fetch`, `paginate` and `first` work much the same way as they do in lucid - they return model instance or holder with rows property that is array of model instances.
-
-`update` and `delete also works much the same way as in lucid.
+`fetch`, `paginate` and `first`, `update` and `delete` work much the same way as they do in lucid.
 
 `nativeResult` will return result as returned by npm elastic adapter without any modification.
 
@@ -305,6 +319,70 @@ await User.rawMany([
 
 ```
 
+## CUSTOM SERIALIZERS
+
+You can define your serializer per model. Serializer would look like this:
+
+```javascript
+class MySerializer {
+    constructor(rows, aggregations, pages) {
+        this.pages = pages
+        this.aggregations = aggregations
+        this.rows = rows
+    }
+    
+    toJSON() {
+        //return serialized object
+    }
+}
+
+module.exports = MySerializer
+```
+
+Then, in model you would define static getter like:
+
+```javascript
+static get Serializer() {
+    return 'App/Serializers/MySerializer'
+}
+```
+
+## TRAITS
+
+Traits work in much the same way as in lucid. Trait is class with register method on it, which accepts model and configuration. You can apply it inside boot on model. Also, you can extend query builder with your own methods with queryMacro.
+
+```javascript
+class MyTrait {
+  register(Model, options={}) {
+      Model.queryMacro('whereUser', function(user) {
+        this.filter('term', 'user', user)
+        return filter
+      })
+      
+      Model.prototype.methodOnInstance = function() {
+        //
+      }
+      
+      Model.staticMethod = function() {
+        //
+      }
+  }
+}
+
+module.exports = MyTrait
+```
+
+Inside model, you can get call trait
+
+```javascript
+static boot() {
+    super.boot()
+    this.addTrait('App/Traits/MyTrait', {/*options*/})
+}
+```
+
+You can supply full path, path relative to `App/Models/Traits/Elastic/` or pointer to trait class.
+
 ## USING OUTSIDE OF ADONIS
 
 This provider is not dependent on adonis framework. However, there are couple of things to keep in mind
@@ -314,17 +392,51 @@ This provider is not dependent on adonis framework. However, there are couple of
 ```javascript
 const elasticLucid = require('elastic-lucid-provider')
 elasticLucid({
-    connection: {
-        host,
-        log,
-        vpcActive,
-        username,
-        password
-    },
-    migrationsDirectory: __dirname
+    //same configuration as you would add to config/elasticLucid.js
 })
 ```
 
+2. Get BaseModel by `require('elastic-lucid-provider/src/Models/Base')`
+
+3. Ace commands won't work outside of adonis. Run migrations like this:
+
+```javascript
+const runMigrations = require('elastic-lucid-provider/src/RunMigrations')
+runMigrations()
+```
+
+4. If using traits, you need to call boot method on your own.
+
+Like in lucid, this provider makes use of iocHooks to run boot code. If outside of adonis, you need to call it some other way. Maybe easiest would be to call it before module.exports
+
+```javascript
+const Model = require('elastic-lucid-provider/src/Models/Base')
+
+class MyModel extends Model {
+    static boot() {
+    //add trait or something
+    }
+}
+
+MyModel._bootIfNotBooted()
+module.exports = MyModel
+```
+
+5. Where you would provide ioc path, provide pointer instead. For example
+
+```javascript
+const Model = require('elastic-lucid-provider/src/Models/Base')
+const MyTrait = require('./MyTrait')
+
+class MyModel extends Model {
+    static boot() {
+        this.addTrait(MyTrait)
+    }
+}
+
+MyModel._bootIfNotBooted()
+module.exports = MyModel
+```
 
 ## Thanks
 
