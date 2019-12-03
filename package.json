@@ -1,6 +1,6 @@
 {
   "name": "elastic-lucid-provider",
-  "version": "1.4.2",
+  "version": "2.0.0",
   "description": "Elasticsearch lucid provider for adonis js",
   "main": "Providers/ElasticLucidProvider.js",
   "scripts": {
