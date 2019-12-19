@@ -12,10 +12,6 @@ class ElasticBaseModel {
     static get adapter() {
         return adapter
     }
-
-    static get createdAtField() {
-        return 'createdAt'
-    }
     
     static get resourceType() {
         return this.name
@@ -26,9 +22,6 @@ class ElasticBaseModel {
     }
 
     static async create(body, id) {
-        if(this.createdAtField) {
-            body[this.createdAtField] = new Date()
-        }
         if(this.resourceType) {
             body[this.resourceTypeField] = this.resourceType
         }

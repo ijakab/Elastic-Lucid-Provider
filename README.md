@@ -111,10 +111,6 @@ class User extends ElasticModel{
         return 'users'
     }
     
-    static get createdAtField() {
-        return 'created_at' //defaults to createdAt
-    }
-    
     static get resourceType() {
         return 'User' //defaults to model name
     }
@@ -160,7 +156,7 @@ This change needed to be made, because unlike most sql databases, elastic does n
 
 ### Static getters
 
-You can define static getters for `createdAtField`, `resourceType` and `resourceTypeField`, and those will be implicitly added when creating elastic documents. Set any to null if you don't want to have them. However, resourceType is useful when building global search, and searching over multiple indexes.
+You can define static getters for `resourceType` and `resourceTypeField`, and those will be implicitly added when creating elastic documents. Set any to null if you don't want to have them. However, resourceType is useful when building global search, and searching over multiple indexes.
 
 ### Serializers
 

@@ -1,3 +1,9 @@
+## 2.0.1
+
+### Removed
+
+- Support for createdAt field
+
 ## 2.0.0
 
 ### Added
