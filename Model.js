@@ -1,1 +1,1 @@
-module.exports = require('./src/Base')
+module.exports = require('./src/Models/Base')
