@@ -10,8 +10,26 @@ module.exports = function (object) {
 function valueToString(value) {
     if(typeof value === 'number' || value === null) return value
     if(typeof value === 'object') {
-        const stringified = JSON.stringify(value)
-        return stringified.replace(/^\{(.*)\}$/,"[$1]") // for some reason elastic accept this weird json
+        return toElasticStupidJson(value) // for some reason elastic accept this weird json
     }
     else return `'${value}'`
 }
+
+const toElasticStupidJson = (data) => `[` +
+    Object.entries(data)
+        .map(v =>
+            `"${v[0]}": ` + (
+                typeof v[1] === `string`
+                    ? `"${v[1]}"`
+                    : (
+                        Array.isArray(v[1]) ?
+                            v[1].map(toElasticStupidJson)
+                            : typeof v[1] === "object"
+                            ? toElasticStupidJson(v[1])
+                            : v[1]
+                    )
+            )
+        )
+        .join(`, `) +
+    `]`;
+
