@@ -9,5 +9,9 @@ module.exports = function (object) {
 
 function valueToString(value) {
     if(typeof value === 'number' || value === null) return value
+    if(typeof value === 'object') {
+        const stringified = JSON.stringify(value)
+        return stringified.replace('{', '[').replace('}', ']') // for some reason elastic accept this weird json
+    }
     else return `'${value}'`
 }
