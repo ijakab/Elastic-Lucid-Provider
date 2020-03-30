@@ -4,6 +4,7 @@ module.exports = function (object) {
     for(let key of Object.keys(object)) {
         if(object[key] !== undefined) script += `${start}${key} = ${valueToString(object[key])};`
     }
+    console.log(script)
     return script
 }
 
@@ -15,22 +16,33 @@ function valueToString(value) {
     else return `'${value}'`
 }
 
-const toElasticStupidJson = (data) => `[` +
-    Object.entries(data)
-        .filter(v => v[1] !== undefined)
-        .map(v =>
-            `"${v[0]}": ` + (
-                typeof v[1] === `string`
-                    ? `"${v[1]}"`
-                    : (
-                        Array.isArray(v[1]) ?
-                            v[1].map(toElasticStupidJson)
-                            : typeof v[1] === "object"
-                            ? toElasticStupidJson(v[1])
-                            : v[1]
-                    )
-            )
-        )
-        .join(`, `) +
-    `]`;
+function toElasticStupidJson(data) {
+    if(isPrimitive(data)) return primitiveDisplay(data)
+    else if(typeof data === 'object') return objectDisplay(data)
+}
 
+function objectDisplay(data) {
+    let inner = ''
+    if(Array.isArray(data)) inner = data.filter(d => d !== undefined).map(toElasticStupidJson).join(', ')
+    else inner = Object.entries(data)
+        .filter(keyValue => keyValue[1] !== undefined)
+        .map(keyValue => {
+            return `"${keyValue[0]}": ` + toElasticStupidJson(keyValue[1])
+        })
+        .join(', ')
+    return `[${inner}]`
+}
+
+function isPrimitive(value) {
+    return typeof value === 'string'
+        || typeof value === 'number'
+        || typeof value === 'boolean'
+        || value === null
+}
+
+function primitiveDisplay(value) {
+    if(typeof value === 'string') return `"${value}"`
+    if(typeof value === 'number') return `${value}`
+    if(typeof value === 'boolean') return `${value}`
+    if(value === null) return 'null'
+}
