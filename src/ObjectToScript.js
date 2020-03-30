@@ -4,7 +4,6 @@ module.exports = function (object) {
     for(let key of Object.keys(object)) {
         if(object[key] !== undefined) script += `${start}${key} = ${valueToString(object[key])};`
     }
-    console.log(script)
     return script
 }
 
