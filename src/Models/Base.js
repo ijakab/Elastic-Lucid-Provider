@@ -152,6 +152,31 @@ class ElasticBaseModel {
     static get makePlain () {
         return true
     }
+    
+    static async iterateRaw(rawQuery, iteratee, { mode = 'Single', timeout = '10m' }) {
+        let startScrollRes = await this.adapter.startScroll(this.index, rawQuery, timeout)
+        let scrollId = startScrollRes.body._scroll_id
+        
+        let hits = startScrollRes.body.hits.hits
+        let scrolledResponse = startScrollRes
+        while(hits.length) {
+            if(mode === 'Single' || mode === 'SingleOnce') {
+                for(let hit of hits) {
+                    let obj = new this(hit._source, hit._id)
+                    await iteratee(obj)
+                }
+            } else {
+                const serializer = this.responseToObject(scrolledResponse)
+                await iteratee(serializer)
+            }
+            
+            if(mode === 'SingleOnce' || mode === 'BatchOnce') break
+            
+            scrolledResponse = await this.adapter.nextScroll(scrollId, timeout)
+            hits = scrolledResponse.body.hits.hits
+        }
+    }
+    
 }
 
 module.exports = ElasticBaseModel
