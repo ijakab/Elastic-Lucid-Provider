@@ -28,7 +28,7 @@
     "bodybuilder": "2.2.18",
     "fs-extra": "8.1.0",
     "http-aws-es": "6.0.0",
-    "lodash": "4.17.13"
+    "lodash": "4.17.19"
   },
   "devDependencies": {
     "@adonisjs/fold": "^4.0.9",
