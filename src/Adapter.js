@@ -1,29 +1,34 @@
 const pick = require('lodash/pick')
 const objectToScript = require('./ObjectToScript')
+const promiseCall = require('./PromiseCall')
 
 module.exports = {
-
+    
     setClient(client) {
         this.client = client
     },
-
+    
     async indexExists(index) {
-        let response = await this.client.indices.exists({index})
+        const p = this.client.indices.exists({index})
+        let response = await promiseCall(p, true)
         return response && response.body
     },
-
+    
     async createIndex(index) {
-        return await this.client.indices.create({index})
+        const p = this.client.indices.create({index})
+        return await promiseCall(p, true)
     },
     
     async openIndex(index) {
-        return await this.client.indices.open({index})
+        const p = this.client.indices.open({index})
+        return await promiseCall(p, true)
     },
     
     async closeIndex(index) {
-        return await this.client.indices.close({index})
+        const p = this.client.indices.close({index})
+        return await promiseCall(p, true)
     },
-
+    
     async runMapping(index, body) {
         let properties = Object.keys(body.properties)
         for(let property of properties) {
@@ -31,19 +36,21 @@ module.exports = {
                 body.properties[property] = {type: body.properties[property]}
             }
         }
-        return await this.client.indices.putMapping({
+        const p = this.client.indices.putMapping({
             index,
             body: JSON.stringify(body)
         })
+        return await promiseCall(p, true)
     },
-
+    
     async runSettings(index, body) {
-        return await this.client.indices.putSettings({
+        const p = this.client.indices.putSettings({
             index,
             body: JSON.stringify(body)
         })
+        return await promiseCall(p, true)
     },
-
+    
     async createOrUpdate(index, body, id) {
         return await this.client.index({
             index,
@@ -51,29 +58,32 @@ module.exports = {
             id
         })
     },
-
+    
     async getSingle(index, id) {
-        return await this.client.get({
+        const p = this.client.get({
             index,
             id
         });
+        return await promiseCall(p, true)
     },
     
     async deleteSingle(index, id) {
-        return await this.client.delete({
+        const p = this.client.delete({
             index,
             type: this.type,
             id
         })
+        return await promiseCall(p, true)
     },
-
+    
     async search(index, body) {
-        return  await this.client.search({
+        const p = this.client.search({
             index,
             body
         })
+        return await promiseCall(p, true)
     },
-
+    
     async bulkAction(index, body, pluckFields) {
         let elasticStupidBody = []
         for(let item of body) {
@@ -86,14 +96,15 @@ module.exports = {
             })
             let updateBody = item.modelInstance.body
             if(pluckFields && pluckFields.length) updateBody = pick(item.modelInstance.body, pluckFields)
-
+            
             elasticStupidBody.push({doc: updateBody})
         }
-        return await this.client.bulk({
+        const p = this.client.bulk({
             body: elasticStupidBody
         })
+        return await promiseCall(p, true)
     },
-
+    
     async multiSearch(index, searches) {
         let elasticStupidBody = []
         for(let search of searches) {
@@ -103,12 +114,20 @@ module.exports = {
             })
             elasticStupidBody.push(search)
         }
-        let elasticResponse = await this.client.msearch({body: elasticStupidBody})
+        const p = this.client.msearch({body: elasticStupidBody})
+        let elasticResponse = await promiseCall(p, true)
         return elasticResponse.responses
     },
-
-    updateByQuery(index, query, updateObject) {
-        return this.client.updateByQuery({
+    
+    async dropIndex(index) {
+        const p = this.client.indices.delete({
+            index
+        });
+        return await promiseCall(p, true)
+    },
+    
+    async updateByQuery(index, query, updateObject) {
+        const p = this.client.updateByQuery({
             index,
             type: this.type,
             conflicts: 'proceed',
@@ -120,34 +139,43 @@ module.exports = {
                 }
             }
         })
+        return await promiseCall(p, true)
     },
     
-    deleteByQuery(index, body) {
-        return this.client.deleteByQuery({
+    async deleteByQuery(index, body) {
+        const p = this.client.deleteByQuery({
             index,
             type: this.type,
             conflicts: 'proceed',
             body
         })
+        return await promiseCall(p, true)
     },
     
+    async dropIndex(index) {
+        const p = this.client.indices.delete({
+            index
+        });
+        return await promiseCall(p, true)
+    },
     
     async startScroll(index, body, timeout) {
-        let response = await this.client.search({
+        const p = this.client.search({
             size: 10000,
             index,
             body,
             rest_total_hits_as_int: true,
             scroll: timeout
         })
-        return response
+        return await promiseCall(p, true)
     },
     
     async nextScroll(scrollId, timeout) {
-        return await this.client.scroll({
+        const p = this.client.scroll({
             scrollId,
             scroll: timeout,
             rest_total_hits_as_int: true
         })
+        return await promiseCall(p, true)
     }
 }
