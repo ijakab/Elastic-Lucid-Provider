@@ -74,10 +74,10 @@ class ElasticBaseModel {
         return await adapter.deleteSingle(this.constructor.index, this.id)
     }
     
-    toJSON() {
+    toJSON(...args) {
         const Serializer = this.constructor.resolveSerializer()
         const serializer = new Serializer([this], null, {isOne: true})
-        return serializer.toJSON()
+        return serializer.toJSON(...args)
     }
 
     static async raw(query) {
