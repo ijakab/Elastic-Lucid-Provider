@@ -18,7 +18,7 @@ class BaseSerializer {
         if(this.pages.isOne) return this.toJSONSingle(this.rows[0], ...args)
         return {
             pagination: this.pages,
-            records: this.rows.map(row => this.toJSONSingle(row),...args)
+            records: this.rows.map(row => this.toJSONSingle(row, ...args))
         }
     }
 }
