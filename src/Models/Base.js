@@ -27,7 +27,7 @@ class ElasticBaseModel {
         }
         let obj = new this(body, id)
         let response = await obj.save()
-        obj.id = response._id
+        obj.id = response.body && response.body._id
         return obj
     }
 
