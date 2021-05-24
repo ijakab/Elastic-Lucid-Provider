@@ -29,7 +29,7 @@
     "fs-extra": "8.1.0",
     "http-aws-es": "6.0.0",
     "js-string-escape": "^1.0.1",
-    "lodash": "4.17.13"
+    "lodash": "4.17.21"
   },
   "devDependencies": {
     "@adonisjs/fold": "^4.0.9",
