@@ -1,6 +1,6 @@
 {
   "name": "elastic-lucid-provider",
-  "version": "2.3.3",
+  "version": "3.0.0",
   "description": "Elasticsearch lucid provider for adonis js",
   "main": "Providers/ElasticLucidProvider.js",
   "scripts": {
@@ -28,6 +28,7 @@
     "bodybuilder": "2.2.18",
     "fs-extra": "8.1.0",
     "http-aws-es": "6.0.0",
+    "js-string-escape": "^1.0.1",
     "lodash": "4.17.13"
   },
   "devDependencies": {

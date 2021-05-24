@@ -1,3 +1,5 @@
+const jsStringEscape = require("js-string-escape")
+
 module.exports = function (object) {
     let start = 'ctx._source.'
     let script = ''
@@ -8,11 +10,12 @@ module.exports = function (object) {
 }
 
 function valueToString(value) {
+    // I forgo sure why am I not using isPrimitive and primitiveDisplay here, but here strings are encircled with ' and in primitiveDisplay "... but that might be ok
     if(typeof value === 'number' || value === null) return value
     if(typeof value === 'object') {
         return toElasticStupidJson(value) // for some reason elastic accept this weird json
     }
-    else return `'${value}'`
+    else return `'${jsStringEscape(value)}'`
 }
 
 function toElasticStupidJson(data) {
@@ -26,7 +29,7 @@ function objectDisplay(data) {
     else inner = Object.entries(data)
         .filter(keyValue => keyValue[1] !== undefined)
         .map(keyValue => {
-            return `"${keyValue[0]}": ` + toElasticStupidJson(keyValue[1])
+            return `"${jsStringEscape(keyValue[0])}": ` + toElasticStupidJson(keyValue[1])
         })
         .join(', ')
     return `[${inner}]`
@@ -40,7 +43,7 @@ function isPrimitive(value) {
 }
 
 function primitiveDisplay(value) {
-    if(typeof value === 'string') return `"${value}"`
+    if(typeof value === 'string') return `"${jsStringEscape(value)}"`
     if(typeof value === 'number') return `${value}`
     if(typeof value === 'boolean') return `${value}`
     if(value === null) return 'null'
